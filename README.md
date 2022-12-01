@@ -1,6 +1,6 @@
 # dcm_to_bids
 
-Converts a dicom directory to bids format. The covertion uses dcm2niix to convert from dicom to nii.gz format. 
+Converts a dicom directory to bids format. The covertion uses dcm2niix to convert from dicom to nii.gz format. As an option, it allows usage of [DWIConvert](https://github.com/BRAINSia/BRAINSTools) to process DWI data. 
 
 ## Installation
 
@@ -26,9 +26,11 @@ conda activate dcm_to_bids
 
 ```
 usage: dcm_to_bids.py [-h] --dir DIR [--skip_split SKIP_SPLIT]
-                      [--csv_id CSV_ID]
+                      [--use_dwi_convert USE_DWI_CONVERT]
+                      [--dwi_convert DWI_CONVERT] [--csv_id CSV_ID]
                       [--use_dirname_as_id USE_DIRNAME_AS_ID]
                       [--out_dcm OUT_DCM] [--out_bids OUT_BIDS]
+                      [--out_ext {.nii.gz,.nrrd}]
 
 Split dicom directory by series number and series description and then convert
 to bids
@@ -40,12 +42,19 @@ Input:
   --dir DIR             Input directory
   --skip_split SKIP_SPLIT
                         Skip dicom split
+  --use_dwi_convert USE_DWI_CONVERT
+                        Use DWIConvert executable instead of dcm2niix to
+                        convert the dwi
+  --dwi_convert DWI_CONVERT
+                        Executable name of DWIConvert
+  --out_ext {.nii.gz,.nrrd}
+                        Output extension type
 
 Input CSV:
   --csv_id CSV_ID       Use this csv file to correct the id and age of the
                         patient. This csv file must have column "pid"
                         (required) and "age" (optional), it must also have
-                        columns for bids_pid (required) and bids_age
+                        columns for "bids_pid" (required) and "bids_age"
                         (required). If this input is not provided, this
                         convertion tool will use the patient id and age found
                         in the dicom.
