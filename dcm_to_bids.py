@@ -89,6 +89,12 @@ def dicom_dir_split(args):
 
 def convert(args, series_description, bids_info, df_search):
 
+	dcm2niix_e = "n" #.nii.gz by default
+	dwiconvert_conversion_mode = "DicomToFSL"
+	if args.out_ext == ".nrrd":
+		dcm2niix_e = "y"
+		dwiconvert_conversion_mode = "DicomToNrrd"
+
 	out_dcm = os.path.join(args.out_dcm, os.path.basename(args.dir))
 
 	# Of all the entries in the pattern_search_scans.csv file we group them by scan as these will all go to the same directory and we need to keep track of the runs. These can be for example T1/T2 going to anat folder or different types of DWI 6shell 76dir etc.
@@ -115,7 +121,15 @@ def convert(args, series_description, bids_info, df_search):
 					out_sd = str(sn) + "_" + sd + "_" + str(sn)
 					dicom_dir = os.path.join(out_dcm, out_sd)
 
-					subprocess.run(["dcm2niix", "-b", "y", "-o", out_bids_scan_dir, dicom_dir], stdout=sys.stdout, stderr=sys.stderr)
+					if args.use_dwi_convert and scan == "dwi":
+
+						out_dwi_convert = os.path.join(out_bids_scan_dir, out_sd + args.out_ext)
+
+						subprocess.run([args.dwi_convert, "--conversionMode", dwiconvert_conversion_mode, "-i", dicom_dir, "--useBMatrixGradientDirections", "-o", out_dwi_convert], stdout=sys.stdout, stderr=sys.stderr)
+
+						subprocess.run(["dcm2niix", "-b", "o", "-o", out_bids_scan_dir, dicom_dir], stdout=sys.stdout, stderr=sys.stderr)
+					else:
+						subprocess.run(["dcm2niix", "-e", dcm2niix_e,"-b", "y", "-o", out_bids_scan_dir, dicom_dir], stdout=sys.stdout, stderr=sys.stderr)
 
 					# We find ALL the output files based on the output series description and series number
 					# it includes .json .nii.gz .bvals .bvecs etc.
@@ -126,6 +140,8 @@ def convert(args, series_description, bids_info, df_search):
 					for file in files:
 
 						ext = os.path.splitext(file)[1]
+						if ext == ".gz":
+							ext = ".nii.gz"
 
 						bids_info_g = bids_info.copy()
 
@@ -191,12 +207,23 @@ if __name__ == '__main__':
 
 
     parser = argparse.ArgumentParser(description='Split dicom directory by series number and series description and then convert to bids')
-    parser.add_argument('--dir', required=True, type=str, help='Input directory')
-    parser.add_argument('--csv_id', default=None, type=str, help='Use this csv file to correct the id and age of the patient. This csv file must have column "pid" (required) and "age" (optional), it must also have columns for bids_pid (required) and bids_age (required). If this input is not provided, this convertion tool will use the patient id and age found in the dicom.')
-    parser.add_argument('--use_dirname_as_id', default=0, type=int, help='Instead of using the id that exists in the dicom, it uses the directory name as matching key. The --csv_id must be provided')
-    parser.add_argument('--skip_split', default=0, type=int, help='Skip dicom split')
-    parser.add_argument('--out_dcm', help='Output directory for dicom split', type=str, default='out_dcm')
-    parser.add_argument('--out_bids', help='Output directory for bids convert', type=str, default='out_bids')
+
+    input_group = parser.add_argument_group('Input')
+
+    input_group.add_argument('--dir', required=True, type=str, help='Input directory')
+    input_group.add_argument('--skip_split', default=0, type=int, help='Skip dicom split')
+    input_group.add_argument('--use_dwi_convert', default=0, type=int, help='Use DWIConvert executable instead of dcm2niix to convert the dwi')
+    input_group.add_argument('--dwi_convert', default="DWIConvert", type=str, help='Executable name of DWIConvert')
+
+    input_group_csv = parser.add_argument_group('Input CSV')
+    input_group_csv.add_argument('--csv_id', default=None, type=str, help='Use this csv file to correct the id and age of the patient. This csv file must have column "pid" (required) and "age" (optional), it must also have columns for "bids_pid" (required) and "bids_age" (required). If this input is not provided, this convertion tool will use the patient id and age found in the dicom.')
+    input_group_csv.add_argument('--use_dirname_as_id', default=0, type=int, help='Instead of using the id that exists in the dicom, it uses the directory name as matching key. The --csv_id must be provided')
+
+    output_group = parser.add_argument_group('Output')
+    output_group.add_argument('--out_dcm', help='Output directory for dicom split', type=str, default='out_dcm')
+    output_group.add_argument('--out_bids', help='Output directory for bids convert', type=str, default='out_bids')
+    input_group.add_argument('--out_ext', default=".nii.gz", choices=['.nii.gz', '.nrrd'], type=str, help='Output extension type')
+
 
     args = parser.parse_args()
 

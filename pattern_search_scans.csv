@@ -3,8 +3,8 @@ anat,.*t1w.*,{bids_pid}_ses-{bids_age}_run-{run_number:03d}_T1w{ext}
 anat,.*t2w.*,{bids_pid}_ses-{bids_age}_run-{run_number:03d}_T2w{ext}
 dwi,(?!.*sbref)(?!.*tracew)(?=.*dwi)(?=.*AP).*$|(?!.*sbref)(?!.*tracew)(?=.*dmri)(?=.*AP)(?=.*6shell).*,{bids_pid}_ses-{bids_age}_acq-6shells_dir-AP_run-{run_number:03d}_dwi{ext}
 dwi,(?!.*sbref)(?!.*tracew)(?=.*dwi)(?=.*PA).*$|(?!.*sbref)(?!.*tracew)(?=.*dmri)(?=.*PA)(?=.*6shell).*,{bids_pid}_ses-{bids_age}_acq-6shells_dir-PA_run-{run_number:03d}_dwi{ext}
-dwi,(?!.*sbref)(?!.*tracew)(?=.*dwi)(?=.*AP).*|(?!.*sbref)(?!.*tracew)(?=.*dmri)(?=.*AP)(?=.*dir79).*,{bids_pid}_ses-{bids_age}_acq-dir79_dir-AP_run-{run_number:03d}_dwi{ext}
-dwi,(?!.*sbref)(?!.*tracew)(?=.*dwi)(?=.*PA).*|(?!.*sbref)(?!.*tracew)(?=.*dmri)(?=.*PA)(?=.*dir79).*,{bids_pid}_ses-{bids_age}_acq-dir79_dir-PA_run-{run_number:03d}_dwi{ext}
+dwi,(?!.*sbref)(?!.*tracew)(?=.*dwi)(?=.*AP)(?=.*dir79).*|(?!.*sbref)(?!.*tracew)(?=.*dmri)(?=.*AP)(?=.*dir79).*,{bids_pid}_ses-{bids_age}_acq-dir79_dir-AP_run-{run_number:03d}_dwi{ext}
+dwi,(?!.*sbref)(?!.*tracew)(?=.*dwi)(?=.*PA)(?=.*dir79).*|(?!.*sbref)(?!.*tracew)(?=.*dmri)(?=.*PA)(?=.*dir79).*,{bids_pid}_ses-{bids_age}_acq-dir79_dir-PA_run-{run_number:03d}_dwi{ext}
 dwi,(?=.*sbref)(?=.*dwi)(?=.*AP).*|(?=.*sbref)(?=.*dmri)(?=.*AP).*,{bids_pid}_ses-{bids_age}_acq-dir79_dir-AP_run-{run_number:03d}_sbref{ext}
 dwi,(?=.*sbref)(?=.*dwi)(?=.*AP).*|(?=.*sbref)(?=.*dmri)(?=.*PA).*,{bids_pid}_ses-{bids_age}_acq-dir79_dir-PA_run-{run_number:03d}_sbref{ext}
 func,(?=.*rfmri)(?=.*AP)(?!.*sbref).*$,{bids_pid}_ses-{bids_age}_acq-AP_run-{run_number:03d}_bold{ext}

@@ -1,0 +1,3 @@
+pid,age,bids_pid,bids_age
+patient_id_in_dicom_or_input_directory_name,patient_age_in_dicom,sub-0001,6mo
+patient_id_in_dicom_or_input_directory_name,patient_age_in_dicom,sub-0001,12mo
