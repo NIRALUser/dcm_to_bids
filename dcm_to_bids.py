@@ -104,7 +104,7 @@ def convert(args, series_description, bids_info, df_search):
 
 		for idx, g in df_g.iterrows():
 
-			out_bids_scan_dir = os.path.join(args.out_bids, bids_info['bids_pid'], bids_info['bids_age'], scan)
+			out_bids_scan_dir = os.path.join(args.out_bids, "sub-" + bids_info['bids_pid'], 'ses-' + bids_info['bids_age'], scan)
 
 			if not os.path.exists(out_bids_scan_dir):
 				os.makedirs(out_bids_scan_dir)
@@ -198,6 +198,10 @@ def main(args):
 	else:
 		bids_info = {'bids_pid': patient_obj['patient_id'], 'bids_age': patient_obj['patient_age']}
 
+	if args.bids_pid and args.bids_age:
+		bids_info = {'bids_pid': args.bids_pid, 'bids_age': args.bids_age}
+
+
 	df_search = pd.read_csv(os.path.join(os.path.dirname(__file__), 'pattern_search_scans.csv'))
 
 	convert(args, series_description, bids_info, df_search)
@@ -210,7 +214,7 @@ if __name__ == '__main__':
 
     input_group = parser.add_argument_group('Input')
 
-    input_group.add_argument('--dir', required=True, type=str, help='Input directory')
+    input_group.add_argument('--dir', required=True, type=str, help='Input directory with DICOM files')
     input_group.add_argument('--skip_split', default=0, type=int, help='Skip dicom split')
     input_group.add_argument('--use_dwi_convert', default=0, type=int, help='Use DWIConvert executable instead of dcm2niix to convert the dwi')
     input_group.add_argument('--dwi_convert', default="DWIConvert", type=str, help='Executable name of DWIConvert')
@@ -218,6 +222,11 @@ if __name__ == '__main__':
     input_group_csv = parser.add_argument_group('Input CSV')
     input_group_csv.add_argument('--csv_id', default=None, type=str, help='Use this csv file to correct the id and age of the patient. This csv file must have column "pid" (required) and "age" (optional), it must also have columns for "bids_pid" (required) and "bids_age" (required). If this input is not provided, this convertion tool will use the patient id and age found in the dicom.')
     input_group_csv.add_argument('--use_dirname_as_id', default=0, type=int, help='Instead of using the id that exists in the dicom, it uses the directory name as matching key. The --csv_id must be provided')
+
+    input_patient = parser.add_argument_group('Input patient info')
+
+    input_patient.add_argument('--bids_pid', default=None, type=str, help='Input bids patient id. If used, it will override --csv_id and dicom\'s PatientID')
+    input_patient.add_argument('--bids_age', default=None, type=str, help='Input bids age or session name. If used, it will override --csv_id and dicom\'s PatientAge')
 
     output_group = parser.add_argument_group('Output')
     output_group.add_argument('--out_dcm', help='Output directory for dicom split', type=str, default='out_dcm')
