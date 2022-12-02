@@ -108,9 +108,6 @@ def convert(args, series_description, bids_info, df_search, choices=['.nii.gz', 
 
 			out_bids_scan_dir = os.path.join(args.out_bids, "sub-" + bids_info['bids_pid'], 'ses-' + bids_info['bids_age'], scan)
 
-			if not os.path.exists(out_bids_scan_dir):
-				os.makedirs(out_bids_scan_dir)
-
 			# We start the counter for each run and iterate through the sorted series description by series number
 			run_number = 1
 			for sn in sorted(series_description):
