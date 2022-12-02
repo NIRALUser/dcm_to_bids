@@ -118,6 +118,9 @@ def convert(args, series_description, bids_info, df_search):
 				# if the series description matches the regex pattern we process this file using dcm2niix to create the output nii file and json side car
 				if re.match(g['match'], sd, re.IGNORECASE):
 
+					if not os.path.exists(out_bids_scan_dir):
+						os.makedirs(out_bids_scan_dir)
+
 					out_sd = str(sn) + "_" + sd + "_" + str(sn)
 					dicom_dir = os.path.join(out_dcm, out_sd)
 
