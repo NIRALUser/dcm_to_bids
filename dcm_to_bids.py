@@ -87,7 +87,7 @@ def dicom_dir_split(args):
 	return series_description, series_files, {'patient_id': patient_id, 'patient_age': patient_age}
 
 
-def convert(args, series_description, bids_info, df_search):
+def convert(args, series_description, bids_info, df_search, choices=['.nii.gz', '.nrrd']):
 
 	dcm2niix_e = "n" #.nii.gz by default
 	dwiconvert_conversion_mode = "DicomToFSL"
@@ -99,6 +99,8 @@ def convert(args, series_description, bids_info, df_search):
 
 	# Of all the entries in the pattern_search_scans.csv file we group them by scan as these will all go to the same directory and we need to keep track of the runs. These can be for example T1/T2 going to anat folder or different types of DWI 6shell 76dir etc.
 	groups = df_search.groupby('scan')
+
+	series_converted = {}
 
 	for scan, df_g in groups:
 
@@ -153,6 +155,9 @@ def convert(args, series_description, bids_info, df_search):
 
 						rename_file = g['out_name'].format(**bids_info_g)
 
+						if sn not in series_converted and ext in choices:
+							series_converted[sn] = os.path.join(scan, rename_file)
+
 						if ext in check_renames:
 							rename_file += "_{num}".format(num=check_renames[ext])
 							print("WARNING: It appears the conversion went wrong as there are more than 1 file with the same extension", file=sys.stderr)
@@ -173,8 +178,37 @@ def convert(args, series_description, bids_info, df_search):
 
 					run_number+=1	
 
+	return series_converted
 
-def main(args):
+def generate_tsv(args, series_files, series_converted, bids_info):
+	print("Generating TSV ...")
+
+	scans_df = []
+
+	for sn in sorted(series_converted):
+
+		sf_dcm = ds = dcmread(series_files[sn][0])
+		sf_converted = series_converted[sn]
+
+		acquisition_date = sf_dcm['AcquisitionDate']	
+		acquisition_time = sf_dcm['AcquisitionTime']
+		
+		acquisition_date = '-'.join([acquisition_date[0:4], acquisition_date[4:6], acquisition_date[6:]])
+		acquisition_time = ':'.join([acquisition_time[0:2], acquisition_time[2:4], acquisition_time[4:6]])
+
+		acq_time = "{acquisition_date}T{acquisition_time}".format(**{'acquisition_date': acquisition_date, 'acquisition_time': acquisition_time})
+
+		scans_df.append({'filename': sf_converted, 'acq_time': acq_time})
+
+
+	out_bids_scans_acq_time = os.path.join(args.out_bids, "sub-" + bids_info['bids_pid'], 'ses-' + bids_info['bids_age'], "sub-" + bids_info['bids_pid'] + "_" + "ses-" + bids_info['bids_age'] + "_scans.tsv")
+
+	scans_df = pd.DataFrame(scans_df)
+
+	print("Writing:", out_bids_scans_acq_time)
+	scans_df.to_csv(out_bids_scans_acq_time, index=False, sep='\t')
+
+def main(args, choices=['.nii.gz', '.nrrd']):
 
 	# series_description = { series_number_1: 'series_description_1', series_number_2: 'series_description_2'} etc.
 	args.dir = os.path.normpath(args.dir)
@@ -207,7 +241,10 @@ def main(args):
 
 	df_search = pd.read_csv(os.path.join(os.path.dirname(__file__), 'pattern_search_scans.csv'))
 
-	convert(args, series_description, bids_info, df_search)
+	series_converted = convert(args, series_description, bids_info, df_search, choices)
+
+	generate_tsv(args, series_files, series_converted, bids_info)
+
 
 
 if __name__ == '__main__':
@@ -239,4 +276,4 @@ if __name__ == '__main__':
 
     args = parser.parse_args()
 
-    main(args)
+    main(args, choices=['.nii.gz', '.nrrd'])
