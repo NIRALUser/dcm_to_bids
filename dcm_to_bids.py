@@ -10,6 +10,7 @@ from pathlib import Path
 import pandas as pd
 import re
 import subprocess
+import json
 
 def dicom_dir_split(args):
 
@@ -167,6 +168,14 @@ def convert(args, series_description, bids_info, df_search, choices=['.nii.gz', 
 							os.rename(file, rename_file)
 						except:
 							print("Error renaming file!", file=sys.stderr)
+
+
+
+						if not pd.isna(g["add_json"]) and ext == ".json":
+							add_json = json.loads(g["add_json"])
+							sidecar_json = json.load(open(rename_file))
+							sidecar_json.update(add_json)
+							json.dump(sidecar_json, open(rename_file, 'w'), indent=4, sort_keys=True)
 
 						if ext not in check_renames:
 							check_renames[ext] = 0

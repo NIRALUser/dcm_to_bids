@@ -1,15 +1,13 @@
-scan,match,out_name
-anat,.*t1w.*,sub-{bids_pid}_ses-{bids_age}_run-{run_number:03d}_T1w{ext}
-anat,.*t2w.*,sub-{bids_pid}_ses-{bids_age}_run-{run_number:03d}_T2w{ext}
-dwi,(?!.*sbref)(?!.*tracew)(?=.*dwi)(?=.*AP).*$|(?!.*sbref)(?!.*tracew)(?=.*dmri)(?=.*AP)(?=.*6shell).*,sub-{bids_pid}_ses-{bids_age}_acq-6shells_dir-AP_run-{run_number:03d}_dwi{ext}
-dwi,(?!.*sbref)(?!.*tracew)(?=.*dwi)(?=.*PA).*$|(?!.*sbref)(?!.*tracew)(?=.*dmri)(?=.*PA)(?=.*6shell).*,sub-{bids_pid}_ses-{bids_age}_acq-6shells_dir-PA_run-{run_number:03d}_dwi{ext}
-dwi,(?!.*sbref)(?!.*tracew)(?=.*dwi)(?=.*AP)(?=.*dir79).*|(?!.*sbref)(?!.*tracew)(?=.*dmri)(?=.*AP)(?=.*dir79).*,sub-{bids_pid}_ses-{bids_age}_acq-dir79_dir-AP_run-{run_number:03d}_dwi{ext}
-dwi,(?!.*sbref)(?!.*tracew)(?=.*dwi)(?=.*PA)(?=.*dir79).*|(?!.*sbref)(?!.*tracew)(?=.*dmri)(?=.*PA)(?=.*dir79).*,sub-{bids_pid}_ses-{bids_age}_acq-dir79_dir-PA_run-{run_number:03d}_dwi{ext}
-dwi,(?=.*sbref)(?=.*dwi)(?=.*AP).*|(?=.*sbref)(?=.*dmri)(?=.*AP).*,sub-{bids_pid}_ses-{bids_age}_acq-dir79_dir-AP_run-{run_number:03d}_sbref{ext}
-dwi,(?=.*sbref)(?=.*dwi)(?=.*AP).*|(?=.*sbref)(?=.*dmri)(?=.*PA).*,sub-{bids_pid}_ses-{bids_age}_acq-dir79_dir-PA_run-{run_number:03d}_sbref{ext}
-func,(?=.*rfmri)(?=.*AP)(?!.*sbref).*$,sub-{bids_pid}_ses-{bids_age}_acq-AP_run-{run_number:03d}_bold{ext}
-func,(?=.*rfmri)(?=.*PA)(?!.*sbref).*$,sub-{bids_pid}_ses-{bids_age}_acq-PA_run-{run_number:03d}_bold{ext}
-func,(?=.*rfmri)(?=.*AP)(?=.*sbref).*$,sub-{bids_pid}_ses-{bids_age}_acq-AP_run-{run_number:03d}_sbref{ext}
-func,(?=.*rfmri)(?=.*PA)(?=.*sbref).*$,sub-{bids_pid}_ses-{bids_age}_acq-PA_run-{run_number:03d}_sbref{ext}
-fmap,(?=.*spinechofield)(?=.*AP).*$,sub-{bids_pid}_ses-{bids_age}_dir-AP_run-{run_number:03d}_epi{ext}
-fmap,(?=.*spinechofield)(?=.*PA).*$,sub-{bids_pid}_ses-{bids_age}_dir-PA_run-{run_number:03d}_epi{ext}
+scan,match,out_name,add_json
+anat,.*t1w.*,sub-{bids_pid}_ses-{bids_age}_run-{run_number:03d}_T1w{ext},
+anat,.*t2w.*,sub-{bids_pid}_ses-{bids_age}_run-{run_number:03d}_T2w{ext},
+dwi,(?!.*sbref)(?!.*tracew)(?=.*dwi)(?=.*AP).*$|(?!.*sbref)(?!.*tracew)(?=.*dmri)(?=.*AP)(?=.*6shell).*,sub-{bids_pid}_ses-{bids_age}_acq-6shells_dir-AP_run-{run_number:03d}_dwi{ext},
+dwi,(?!.*sbref)(?!.*tracew)(?=.*dwi)(?=.*PA).*$|(?!.*sbref)(?!.*tracew)(?=.*dmri)(?=.*PA)(?=.*6shell).*,sub-{bids_pid}_ses-{bids_age}_acq-6shells_dir-PA_run-{run_number:03d}_dwi{ext},
+dwi,(?!.*sbref)(?!.*tracew)(?=.*dwi)(?=.*AP)(?=.*dir79).*|(?!.*sbref)(?!.*tracew)(?=.*dmri)(?=.*AP)(?=.*dir79).*,sub-{bids_pid}_ses-{bids_age}_acq-dir79_dir-AP_run-{run_number:03d}_dwi{ext},
+dwi,(?!.*sbref)(?!.*tracew)(?=.*dwi)(?=.*PA)(?=.*dir79).*|(?!.*sbref)(?!.*tracew)(?=.*dmri)(?=.*PA)(?=.*dir79).*,sub-{bids_pid}_ses-{bids_age}_acq-dir79_dir-PA_run-{run_number:03d}_dwi{ext},
+func,(?=.*rfmri)(?=.*AP)(?!.*sbref).*$,sub-{bids_pid}_ses-{bids_age}_task-rest_acq-AP_run-{run_number:03d}_bold{ext},{"TaskName": "rest"}
+func,(?=.*rfmri)(?=.*PA)(?!.*sbref).*$,sub-{bids_pid}_ses-{bids_age}_task-rest_acq-PA_run-{run_number:03d}_bold{ext},{"TaskName": "rest"}
+func,(?=.*rfmri)(?=.*AP)(?=.*sbref).*$,sub-{bids_pid}_ses-{bids_age}_acq-AP_run-{run_number:03d}_sbref{ext},
+func,(?=.*rfmri)(?=.*PA)(?=.*sbref).*$,sub-{bids_pid}_ses-{bids_age}_acq-PA_run-{run_number:03d}_sbref{ext},
+fmap,(?=.*spinechofield)(?=.*AP).*$,sub-{bids_pid}_ses-{bids_age}_dir-AP_run-{run_number:03d}_epi{ext},
+fmap,(?=.*spinechofield)(?=.*PA).*$,sub-{bids_pid}_ses-{bids_age}_dir-PA_run-{run_number:03d}_epi{ext},
