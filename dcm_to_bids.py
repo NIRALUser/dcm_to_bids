@@ -40,17 +40,19 @@ def dicom_dir_split(args):
                 sn = ds['SeriesNumber'].value
                 sd = ds['SeriesDescription'].value
 
+                sn_sd = (sn, sd)
+
                 if(patient_id == ''):
                     patient_id = ds['PatientID'].value
 
                 if(patient_age == ''):
                     patient_age = ds['PatientAge'].value
 
-                if sn not in series_description:
-                    series_description[sn] = sd
-                    series_files[sn] = []
+                if sn_sd not in series_description:
+                    series_description[sn_sd] = sd
+                    series_files[sn_sd] = []
 
-                series_files[sn].append(file)
+                series_files[sn_sd].append(file)
         except:
             print(bcolors.FAIL, "Not a dicom file:", file, bcolors.ENDC, file=sys.stderr)
 
@@ -63,9 +65,9 @@ def dicom_dir_split(args):
 
     print(bcolors.INFO, "Generating directories ...", bcolors.ENDC)
 
-    for sn in series_description:
+    for sn_sd in series_description:
 
-        sd = series_description[sn]
+        sn, sd = sn_sd
 
         out_sd = str(sn) + "_" + sd
         out_dir = os.path.join(out_dcm, out_sd)
@@ -75,13 +77,11 @@ def dicom_dir_split(args):
 
 
     print(bcolors.INFO, "Copying dicoms ...", bcolors.ENDC)
-    for sn in series_description:
+    for sn_sd in series_description:
 
-        sd = series_description[sn]
+        sn, sd = sn_sd
 
-        out_dir = os.path.join(out_dcm, sd)
-
-        sfs = series_files[sn]
+        sfs = series_files[sn_sd]
 
         for sf in sfs:
 
@@ -118,11 +118,14 @@ def find_all_converted(args, series_description, bids_info, df_search, choices=[
                 sidecar_json = json.load(open(jsf))
 
                 sn = sidecar_json["SeriesNumber"]
+                sd = sidecar_json["SeriesDescription"]
+
+                sn_sd = (sn, sd)
 
                 img = jsf.replace('.json', args.out_ext)
 
                 if(os.path.exists(img)):
-                    series_converted[sn] = img.replace(out_bids_sub_age, '')
+                    series_converted[sn_sd] = img.replace(out_bids_sub_age, '')
                 else:
                     print(bcolors.WARNING, "File not found when generating dictionary for tsv file", img, bcolors.ENDC)
 
@@ -155,9 +158,9 @@ def convert(args, series_description, bids_info, df_search, choices=['.nii.gz', 
 
             # We start the counter for each run and iterate through the sorted series description by series number
             run_number = 1
-            for sn in sorted(series_description):
+            for sn_sd in sorted(series_description):
 
-                sd = series_description[sn]
+                sd = series_description[sn_sd]
                 
                 # if the series description matches the regex pattern we process this file using dcm2niix to create the output nii file and json side car
                 if re.match(g['match'], sd, re.IGNORECASE):
@@ -165,6 +168,7 @@ def convert(args, series_description, bids_info, df_search, choices=['.nii.gz', 
                     if not os.path.exists(out_bids_scan_dir):
                         os.makedirs(out_bids_scan_dir)
 
+                    sn = sn_sd[0]
                     out_sd = str(sn) + "_" + sd
                     dicom_dir = os.path.join(out_dcm, out_sd)
 
@@ -197,8 +201,8 @@ def convert(args, series_description, bids_info, df_search, choices=['.nii.gz', 
 
                         rename_file = g['out_name'].format(**bids_info_g)
 
-                        if sn not in series_converted and ext in choices:
-                            series_converted[sn] = os.path.join(scan, rename_file)
+                        if sn_sd not in series_converted and ext in choices:
+                            series_converted[sn_sd] = os.path.join(scan, rename_file)
 
                         if ext in check_renames:
                             rename_file += "_{num}".format(num=check_renames[ext])
@@ -235,10 +239,10 @@ def generate_tsv(args, series_files, series_converted, bids_info):
 
     scans_df = []
 
-    for sn in sorted(series_converted):
+    for sn_sd in sorted(series_converted):
 
-        sf_dcm = dcmread(series_files[sn][0])
-        sf_converted = series_converted[sn]
+        sf_dcm = dcmread(series_files[sn_sd][0])
+        sf_converted = series_converted[sn_sd]
 
         acquisition_date = sf_dcm['AcquisitionDate']    
         acquisition_time = sf_dcm['AcquisitionTime']
@@ -257,6 +261,56 @@ def generate_tsv(args, series_files, series_converted, bids_info):
 
     print(bcolors.INFO, "Writing:", out_bids_scans_acq_time, bcolors.ENDC)
     scans_df.to_csv(out_bids_scans_acq_time, index=False, sep='\t')
+
+def insert_intended_for_fmap(bids_dir, bids_info):
+    """Insert the IntendedFor field to JSON sidecart for fieldmap data"""
+
+    fmap_path = "{bids_dir}/sub-{bids_pid}/ses-{bids_age}/fmap".format(**bids_info)
+    func_path = "{bids_dir}/sub-{bids_pid}/ses-{bids_age}/func".format(**bids_info)
+    dwi_path = "{bids_dir}/sub-{bids_pid}/ses-{bids_age}/dwi".format(**bids_info)
+
+    nii_files = []
+    json_files = []
+
+    if os.path.exists(fmap_path):
+        fmap_files = [os.path.join(fmap_path, f) for f in os.listdir(fmap_path)]
+        json_files = [f for f in fmap_files if f.endswith(".json")]
+        print(f"List of JSON files to amend {json_files}")
+
+    if os.path.exists(func_path):               
+
+        # makes list of the func files to add into the intended for field
+        func_files = ["ses-{bids_age}/func/{file}".format(**bids_info, file=file) for file in os.listdir(func_path)]
+        nii_files += [i for i in func_files if i.endswith(".nii.gz") and "sbref" not in i]                
+
+    if os.path.exists(dwi_path):
+
+        # makes list of the func files to add into the intended for field
+        dwi_files = ["ses-{bids_age}/dwi/{file}".format(**bids_info, file=file) for file in os.listdir(dwi_path)]
+        nii_files += [i for i in dwi_files if i.endswith(".nii.gz")]
+
+    if len(nii_files) > 0 and len(json_files) > 0:
+
+        print("List of NII files", nii_files)
+
+        # Open the json files ('r' for read only) as a dictionary
+        # Adds the Intended for key
+        # Add the func files to the key value
+        # The f.close is a duplication.
+        # f can only be used inside the with "loop"
+        # we open the file again to write only and
+        # dump the dictionary to the files
+        for file in json_files:
+            os.chmod(file, 0o664)
+            with open(file, "r") as f:
+                print(f"Processing file {f}")
+                data = json.load(f)
+                data["IntendedFor"] = nii_files
+                f.close
+            with open(file, "w") as f:
+                json.dump(data, f, indent=4, sort_keys=True)
+                f.close
+                print("Done with re-write")
 
 def main(args, choices=['.nii.gz', '.nrrd']):
 
@@ -300,7 +354,7 @@ def main(args, choices=['.nii.gz', '.nrrd']):
     if args.generate_tsv > 0:
         generate_tsv(args, series_files, series_converted, bids_info)
 
-
+    insert_intended_for_fmap(args.out_bids, bids_info)
 
 if __name__ == '__main__':
 
