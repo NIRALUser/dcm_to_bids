@@ -29,6 +29,7 @@ usage: dcm_to_bids.py [-h] --dir DIR [--skip_split SKIP_SPLIT]
                       [--use_dwi_convert USE_DWI_CONVERT]
                       [--dwi_convert DWI_CONVERT] [--csv_id CSV_ID]
                       [--use_dirname_as_id USE_DIRNAME_AS_ID]
+                      [--bids_pid BIDS_PID] [--bids_age BIDS_AGE]
                       [--out_dcm OUT_DCM] [--out_bids OUT_BIDS]
                       [--out_ext {.nii.gz,.nrrd}]
 
@@ -39,7 +40,7 @@ optional arguments:
   -h, --help            show this help message and exit
 
 Input:
-  --dir DIR             Input directory
+  --dir DIR             Input directory with DICOM files
   --skip_split SKIP_SPLIT
                         Skip dicom split
   --use_dwi_convert USE_DWI_CONVERT
@@ -62,6 +63,12 @@ Input CSV:
                         Instead of using the id that exists in the dicom, it
                         uses the directory name as matching key. The --csv_id
                         must be provided
+
+Input patient info:
+  --bids_pid BIDS_PID   Input bids patient id. If used, it will override
+                        --csv_id and dicom's PatientID
+  --bids_age BIDS_AGE   Input bids age or session name. If used, it will
+                        override --csv_id and dicom's PatientAge
 
 Output:
   --out_dcm OUT_DCM     Output directory for dicom split
