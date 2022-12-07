@@ -76,7 +76,7 @@ def dicom_dir_split(args):
             os.makedirs(out_dir)
 
 
-    print(bcolors.INFO, "Copying dicoms ...", bcolors.ENDC)
+    print(bcolors.INFO, "linking dicoms ...", bcolors.ENDC)
     for sn_sd in series_description:
 
         sn, sd = sn_sd
@@ -92,10 +92,15 @@ def dicom_dir_split(args):
                 out_sf += ".dcm"
 
             try:
-                print(bcolors.SUCCESS, "copy:", sf, '->', out_sf, bcolors.ENDC)
-                shutil.copy(sf, out_sf)
+                
+                sf = Path(sf).absolute()
+                out_sf = Path(out_sf).absolute()
+
+                print(bcolors.SUCCESS, "link:", sf, '->', out_sf, bcolors.ENDC)
+                os.symlink(sf, out_sf)
+
             except:
-                print(bcolors.FAIL, "Error copying file", sf, bcolors.ENDC, file=sys.stderr)
+                print(bcolors.FAIL, "Error linking file", sf, bcolors.ENDC, file=sys.stderr)
 
     print(bcolors.SUCCESS, "Dicom split done!", bcolors.ENDC)
     return series_description, series_files, {'patient_id': patient_id, 'patient_age': patient_age}
@@ -265,9 +270,12 @@ def generate_tsv(args, series_files, series_converted, bids_info):
 def insert_intended_for_fmap(bids_dir, bids_info):
     """Insert the IntendedFor field to JSON sidecart for fieldmap data"""
 
-    fmap_path = "{bids_dir}/sub-{bids_pid}/ses-{bids_age}/fmap".format(**bids_info)
-    func_path = "{bids_dir}/sub-{bids_pid}/ses-{bids_age}/func".format(**bids_info)
-    dwi_path = "{bids_dir}/sub-{bids_pid}/ses-{bids_age}/dwi".format(**bids_info)
+    obj = bids_info.copy()
+    obj['bids_dir'] = bids_dir
+
+    fmap_path = "{bids_dir}/sub-{bids_pid}/ses-{bids_age}/fmap".format(**obj)
+    func_path = "{bids_dir}/sub-{bids_pid}/ses-{bids_age}/func".format(**obj)
+    dwi_path = "{bids_dir}/sub-{bids_pid}/ses-{bids_age}/dwi".format(**obj)
 
     nii_files = []
     json_files = []
@@ -280,13 +288,13 @@ def insert_intended_for_fmap(bids_dir, bids_info):
     if os.path.exists(func_path):               
 
         # makes list of the func files to add into the intended for field
-        func_files = ["ses-{bids_age}/func/{file}".format(**bids_info, file=file) for file in os.listdir(func_path)]
+        func_files = ["ses-{bids_age}/func/{file}".format(bids_age=obj['bids_age'], file=file) for file in os.listdir(func_path)]
         nii_files += [i for i in func_files if i.endswith(".nii.gz") and "sbref" not in i]                
 
     if os.path.exists(dwi_path):
 
         # makes list of the func files to add into the intended for field
-        dwi_files = ["ses-{bids_age}/dwi/{file}".format(**bids_info, file=file) for file in os.listdir(dwi_path)]
+        dwi_files = ["ses-{bids_age}/dwi/{file}".format(bids_age=obj['bids_age'], file=file) for file in os.listdir(dwi_path)]
         nii_files += [i for i in dwi_files if i.endswith(".nii.gz")]
 
     if len(nii_files) > 0 and len(json_files) > 0:
@@ -302,8 +310,8 @@ def insert_intended_for_fmap(bids_dir, bids_info):
         # dump the dictionary to the files
         for file in json_files:
             os.chmod(file, 0o664)
+            print(f"Processing file {file}")
             with open(file, "r") as f:
-                print(f"Processing file {f}")
                 data = json.load(f)
                 data["IntendedFor"] = nii_files
                 f.close
