@@ -7,7 +7,7 @@ dwi,(?!.*sbref)(?!.*tracew)(?=.*dwi)(?=.*AP)(?=.*dir79).*|(?!.*sbref)(?!.*tracew
 dwi,(?!.*sbref)(?!.*tracew)(?=.*dwi)(?=.*PA)(?=.*dir79).*|(?!.*sbref)(?!.*tracew)(?=.*dmri)(?=.*PA)(?=.*dir79).*,sub-{bids_pid}_ses-{bids_age}_acq-dir79_dir-PA_run-{run_number:03d}_dwi{ext},
 func,(?=.*rfmri)(?=.*AP)(?!.*sbref).*$,sub-{bids_pid}_ses-{bids_age}_task-rest_acq-AP_run-{run_number:03d}_bold{ext},{"TaskName": "rest"}
 func,(?=.*rfmri)(?=.*PA)(?!.*sbref).*$,sub-{bids_pid}_ses-{bids_age}_task-rest_acq-PA_run-{run_number:03d}_bold{ext},{"TaskName": "rest"}
-func,(?=.*rfmri)(?=.*AP)(?=.*sbref).*$,sub-{bids_pid}_ses-{bids_age}_acq-AP_run-{run_number:03d}_sbref{ext},
-func,(?=.*rfmri)(?=.*PA)(?=.*sbref).*$,sub-{bids_pid}_ses-{bids_age}_acq-PA_run-{run_number:03d}_sbref{ext},
+func,(?=.*rfmri)(?=.*AP)(?=.*sbref).*$,sub-{bids_pid}_ses-{bids_age}_task-rest_acq-AP_run-{run_number:03d}_sbref{ext},
+func,(?=.*rfmri)(?=.*PA)(?=.*sbref).*$,sub-{bids_pid}_ses-{bids_age}_task-rest_acq-PA_run-{run_number:03d}_sbref{ext},
 fmap,(?=.*spinechofield)(?=.*AP).*$,sub-{bids_pid}_ses-{bids_age}_dir-AP_run-{run_number:03d}_epi{ext},
 fmap,(?=.*spinechofield)(?=.*PA).*$,sub-{bids_pid}_ses-{bids_age}_dir-PA_run-{run_number:03d}_epi{ext},
