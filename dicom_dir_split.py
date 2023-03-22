@@ -106,6 +106,7 @@ def dicom_dir_split(args):
     return series_description, series_files, {'patient_id': patient_id, 'patient_age': patient_age}
 
 def main(args):
+    dicom_dir_split(args)
 
 
 if __name__ == '__main__':
@@ -121,6 +122,7 @@ if __name__ == '__main__':
     input_dir_csv.add_argument('--dir', type=str, help='Input directory with DICOM files')
     input_dir_csv.add_argument('--csv', default=None, type=str, help='NOT USED')
 
+    output_group = parser.add_argument_group('Output')
     output_group.add_argument('--out_dcm', help='Output directory for dicom split', type=str, default=None)        
 
 
