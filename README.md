@@ -2,6 +2,35 @@
 
 Converts a dicom directory to bids format. The covertion uses dcm2niix to convert from dicom to nii.gz format. As an option, it allows usage of [DWIConvert](https://github.com/BRAINSia/BRAINSTools) to process DWI data. 
 
+## Installation for NIRAL Users in longleaf
+
+1. Make sure you have conda installed. If you don't have conda add the following line to your .bashrc
+
+```
+. /nas/longleaf/apps/anaconda/5.2.0/etc/profile.d/conda.sh
+```
+
+2. Add the environment to your list of conda environments by running 
+
+```
+/proj/NIRAL/tools/dcm_to_bids/dcm_to_bids/add_environment.sh
+```
+
+3. Test if it works by running
+
+```
+conda env list
+```
+
+You should see the entry dcm_to_bids
+
+4. Activate the environment
+
+```
+conda activate dcm_to_bids
+```
+   
+
 ## Installation
 
 1. Clone this repository
